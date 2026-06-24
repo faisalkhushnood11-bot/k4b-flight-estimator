@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FormState, DestinationResult } from "@/lib/types";
 import { calculateEstimates } from "@/lib/estimator";
+import PasswordGate from "@/components/PasswordGate";
 
 const ORIGIN_CITIES = [
   "Amsterdam", "Berlin", "Dubai", "London", "Mumbai",
@@ -506,6 +507,7 @@ export default function Home() {
   };
 
   return (
+    <PasswordGate>
     <div className="min-h-screen flex flex-col" style={{ background: "#f8f9fb" }}>
       <nav className="flex items-center px-8 h-14 shrink-0 border-b border-gray-100" style={{ background: "#ffffff" }}>
         <span className="font-bold text-base tracking-tight" style={{ color: KAYAK_DARK }}>
@@ -565,5 +567,6 @@ export default function Home() {
         Prices are estimates for demo purposes only. Not for actual booking.
       </footer>
     </div>
+    </PasswordGate>
   );
 }
