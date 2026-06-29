@@ -3,12 +3,15 @@ export interface Origin {
   count: number;
 }
 
+export type CabinClass = "economy" | "business" | "first";
+
 export interface FormState {
   origins: Origin[];
   destinations: string[];
   departureDate: string;
   returnDate: string;
   directOnly: boolean;
+  cabinClass: CabinClass;
 }
 
 export interface RouteResult {

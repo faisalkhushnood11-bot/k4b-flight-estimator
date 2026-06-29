@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { FormState, DestinationResult } from "@/lib/types";
+import type { FormState, DestinationResult, CabinClass } from "@/lib/types";
 import { calculateEstimates } from "@/lib/estimator";
 import PasswordGate from "@/components/PasswordGate";
 
@@ -315,6 +315,30 @@ function Step3({
         </div>
       </div>
 
+      <div className="mb-5">
+        <label className="block text-xs font-medium text-gray-500 mb-2">Cabin class</label>
+        <div className="flex gap-2">
+          {(["economy", "business", "first"] as CabinClass[]).map((cabin) => {
+            const labels: Record<CabinClass, string> = { economy: "Economy", business: "Business", first: "First" };
+            const active = state.cabinClass === cabin;
+            return (
+              <button
+                key={cabin}
+                onClick={() => setState({ ...state, cabinClass: cabin })}
+                className="flex-1 py-2 rounded-lg text-sm font-medium border transition-all"
+                style={{
+                  background: active ? KAYAK_ORANGE : "#fff",
+                  borderColor: active ? KAYAK_ORANGE : "#e2e8f0",
+                  color: active ? "#fff" : "#64748b",
+                }}
+              >
+                {labels[cabin]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <label className="flex items-center gap-3 cursor-pointer">
         <div
           onClick={() => setState({ ...state, directOnly: !state.directOnly })}
@@ -371,7 +395,8 @@ function ResultsScreen({
           <h2 className="text-xl font-semibold text-gray-900">Flight cost comparison</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             {totalTravelers} traveler{totalTravelers !== 1 ? "s" : ""} ·{" "}
-            {state.departureDate} → {state.returnDate}
+            {state.departureDate} → {state.returnDate} ·{" "}
+            {state.cabinClass.charAt(0).toUpperCase() + state.cabinClass.slice(1)}
             {state.directOnly ? " · Direct only" : ""}
           </p>
         </div>
@@ -478,6 +503,7 @@ const defaultState: FormState = {
   departureDate: "",
   returnDate: "",
   directOnly: false,
+  cabinClass: "economy",
 };
 
 export default function Home() {
@@ -492,7 +518,8 @@ export default function Home() {
       const estimates = calculateEstimates(
         formState.origins,
         formState.destinations,
-        formState.directOnly
+        formState.directOnly,
+        formState.cabinClass
       );
       setResults(estimates);
       setLoading(false);

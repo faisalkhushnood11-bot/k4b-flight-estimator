@@ -1,18 +1,25 @@
 import flightData from "@/data/flights.json";
-import type { Origin, DestinationResult, RouteResult } from "./types";
+import type { Origin, DestinationResult, RouteResult, CabinClass } from "./types";
 
 const flights = flightData as Record<string, { economy: number; direct: boolean }>;
 
+const CABIN_MULTIPLIER: Record<CabinClass, number> = {
+  economy: 1,
+  business: 3,
+  first: 6,
+};
+
 function getPrice(origin: string, destination: string): { economy: number; direct: boolean } | null {
-  const key = `${origin}-${destination}`;
-  return flights[key] ?? null;
+  return flights[`${origin}-${destination}`] ?? null;
 }
 
 export function calculateEstimates(
   origins: Origin[],
   destinations: string[],
-  directOnly: boolean
+  directOnly: boolean,
+  cabinClass: CabinClass
 ): DestinationResult[] {
+  const multiplier = CABIN_MULTIPLIER[cabinClass];
   const results: DestinationResult[] = [];
 
   for (const dest of destinations) {
@@ -33,11 +40,12 @@ export function calculateEstimates(
 
       if (directOnly && !data.direct) continue;
 
-      const subtotal = data.economy * origin.count;
+      const pricePerPerson = Math.round(data.economy * multiplier);
+      const subtotal = pricePerPerson * origin.count;
       routes.push({
         origin: origin.city,
         destination: dest,
-        pricePerPerson: data.economy,
+        pricePerPerson,
         direct: data.direct,
         travelers: origin.count,
         subtotal,
