@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchFlightPrice } from "@/lib/amadeus";
-import { cityToIATA } from "@/lib/iata-codes";
+import { getIATACode } from "@/lib/airports";
 import flightData from "@/data/flights.json";
 
 const flights = flightData as Record<string, { economy: number; direct: boolean }>;
@@ -42,14 +42,14 @@ export async function POST(request: NextRequest) {
     for (const dest of destinations) {
       if (!dest.trim()) continue;
 
-      const destIATA = cityToIATA(dest);
+      const destIATA = getIATACode(dest);
       const routes = [];
       let totalTravelers = 0;
 
       for (const origin of origins) {
         if (!origin.city.trim()) continue;
 
-        const originIATA = cityToIATA(origin.city);
+        const originIATA = getIATACode(origin.city);
         let price: number | null = null;
         let isDirect = false;
         let source: "api" | "fallback" = "fallback";

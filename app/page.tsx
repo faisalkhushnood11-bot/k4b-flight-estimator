@@ -3,23 +3,8 @@
 import { useState } from "react";
 import type { FormState, DestinationResult, CabinClass } from "@/lib/types";
 import { calculateEstimates } from "@/lib/estimator"; // Fallback for offline use
+import { searchAirports } from "@/lib/airports";
 import PasswordGate from "@/components/PasswordGate";
-
-const ALL_CITIES = [
-  "Amsterdam", "Athens", "Bali", "Bangalore", "Bangkok", "Barcelona",
-  "Beijing", "Berlin", "Bogotá", "Buenos Aires", "Budapest", "Cairo",
-  "Cape Town", "Chicago", "Copenhagen", "Delhi", "Doha", "Dubai",
-  "Dublin", "Frankfurt", "Helsinki", "Hong Kong", "Istanbul", "Jakarta",
-  "Johannesburg", "Kuala Lumpur", "Lagos", "Lima", "Lisbon", "London",
-  "Los Angeles", "Madrid", "Manila", "Mexico City", "Miami", "Milan",
-  "Moscow", "Mumbai", "Nairobi", "New York", "Oslo", "Paris", "Prague",
-  "Riyadh", "Rome", "San Francisco", "São Paulo", "Seoul", "Shanghai",
-  "Singapore", "Stockholm", "Sydney", "Taipei", "Tel Aviv", "Tokyo",
-  "Toronto", "Vienna", "Warsaw", "Zurich",
-];
-
-const ORIGIN_CITIES = ALL_CITIES;
-const DESTINATION_CITIES = ALL_CITIES;
 
 const KAYAK_BLUE = "#0546B0";
 const KAYAK_ORANGE = "#FF6B00";
@@ -68,39 +53,44 @@ function StepIndicator({ current }: { current: number }) {
 function CityAutocomplete({
   value,
   onChange,
-  options,
   placeholder,
 }: {
   value: string;
   onChange: (v: string) => void;
-  options: string[];
   placeholder: string;
 }) {
   const [open, setOpen] = useState(false);
-  const filtered = options.filter(
-    (o) => o.toLowerCase().includes(value.toLowerCase()) && o !== value
-  );
+  const [query, setQuery] = useState("");
+
+  const results = searchAirports(query || value, 8);
+  const showResults = open && results.length > 0 && query.length >= 2;
 
   return (
     <div className="relative">
       <input
         type="text"
         value={value}
-        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
+        onChange={(e) => {
+          const v = e.target.value;
+          onChange(v);
+          setQuery(v);
+          setOpen(true);
+        }}
+        onFocus={() => { setQuery(value); setOpen(true); }}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder={placeholder}
         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:border-transparent bg-white"
       />
-      {open && filtered.length > 0 && (
-        <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-44 overflow-y-auto">
-          {filtered.map((city) => (
+      {showResults && (
+        <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto">
+          {results.map((airport) => (
             <li
-              key={city}
-              onMouseDown={() => { onChange(city); setOpen(false); }}
-              className="px-4 py-2 text-sm cursor-pointer hover:bg-blue-50"
+              key={airport.iata}
+              onMouseDown={() => { onChange(airport.city); setQuery(""); setOpen(false); }}
+              className="px-4 py-2.5 text-sm cursor-pointer hover:bg-blue-50 flex items-center justify-between"
             >
-              {city}
+              <span className="text-gray-800">{airport.city}</span>
+              <span className="text-xs text-gray-400 ml-2">{airport.iata} · {airport.country}</span>
             </li>
           ))}
         </ul>
@@ -145,8 +135,7 @@ function Step1({
               <CityAutocomplete
                 value={origin.city}
                 onChange={(v) => updateOrigin(i, "city", v)}
-                options={ORIGIN_CITIES}
-                placeholder="e.g. Berlin"
+                placeholder="e.g. Boston, Berlin, Tokyo..."
               />
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -237,8 +226,7 @@ function Step2({
               <CityAutocomplete
                 value={dest}
                 onChange={(v) => updateDest(i, v)}
-                options={DESTINATION_CITIES}
-                placeholder={`e.g. ${DESTINATION_CITIES[i] ?? "Destination"}`}
+                placeholder="e.g. Lisbon, Barcelona, Miami..."
               />
             </div>
             {state.destinations.length > 1 && (
