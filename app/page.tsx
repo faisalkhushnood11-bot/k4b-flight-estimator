@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { FormState, DestinationResult, CabinClass } from "@/lib/types";
-import { calculateEstimates } from "@/lib/estimator";
+import { calculateEstimates } from "@/lib/estimator"; // Fallback for offline use
 import PasswordGate from "@/components/PasswordGate";
 
 const ORIGIN_CITIES = [
@@ -512,9 +512,38 @@ export default function Home() {
   const [results, setResults] = useState<DestinationResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Try the API route first (uses Amadeus if configured, falls back to dummy data server-side)
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          origins: formState.origins,
+          destinations: formState.destinations,
+          departureDate: formState.departureDate,
+          returnDate: formState.returnDate,
+          directOnly: formState.directOnly,
+          cabinClass: formState.cabinClass,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResults(data.results);
+      } else {
+        // API route failed — fall back to client-side dummy calculation
+        const estimates = calculateEstimates(
+          formState.origins,
+          formState.destinations,
+          formState.directOnly,
+          formState.cabinClass
+        );
+        setResults(estimates);
+      }
+    } catch {
+      // Network error — fall back to client-side dummy calculation
       const estimates = calculateEstimates(
         formState.origins,
         formState.destinations,
@@ -522,9 +551,9 @@ export default function Home() {
         formState.cabinClass
       );
       setResults(estimates);
-      setLoading(false);
-      setStep(4);
-    }, 1200);
+    }
+    setLoading(false);
+    setStep(4);
   };
 
   const handleReset = () => {
