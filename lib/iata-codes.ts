@@ -68,6 +68,7 @@ const CITY_TO_IATA: Record<string, string> = {
   "Taipei": "TPE",
   "Shanghai": "PVG",
   "Beijing": "PEK",
+  "Miami": "MIA",
 };
 
 /**

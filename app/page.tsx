@@ -5,15 +5,21 @@ import type { FormState, DestinationResult, CabinClass } from "@/lib/types";
 import { calculateEstimates } from "@/lib/estimator"; // Fallback for offline use
 import PasswordGate from "@/components/PasswordGate";
 
-const ORIGIN_CITIES = [
-  "Amsterdam", "Berlin", "Dubai", "London", "Mumbai",
-  "New York", "Paris", "San Francisco", "Singapore", "Toronto",
+const ALL_CITIES = [
+  "Amsterdam", "Athens", "Bali", "Bangalore", "Bangkok", "Barcelona",
+  "Beijing", "Berlin", "Bogotá", "Buenos Aires", "Budapest", "Cairo",
+  "Cape Town", "Chicago", "Copenhagen", "Delhi", "Doha", "Dubai",
+  "Dublin", "Frankfurt", "Helsinki", "Hong Kong", "Istanbul", "Jakarta",
+  "Johannesburg", "Kuala Lumpur", "Lagos", "Lima", "Lisbon", "London",
+  "Los Angeles", "Madrid", "Manila", "Mexico City", "Miami", "Milan",
+  "Moscow", "Mumbai", "Nairobi", "New York", "Oslo", "Paris", "Prague",
+  "Riyadh", "Rome", "San Francisco", "São Paulo", "Seoul", "Shanghai",
+  "Singapore", "Stockholm", "Sydney", "Taipei", "Tel Aviv", "Tokyo",
+  "Toronto", "Vienna", "Warsaw", "Zurich",
 ];
 
-const DESTINATION_CITIES = [
-  "Athens", "Bali", "Bangkok", "Barcelona", "Cape Town",
-  "Dubai", "Istanbul", "Lisbon", "Mexico City", "Prague",
-];
+const ORIGIN_CITIES = ALL_CITIES;
+const DESTINATION_CITIES = ALL_CITIES;
 
 const KAYAK_BLUE = "#0546B0";
 const KAYAK_ORANGE = "#FF6B00";
